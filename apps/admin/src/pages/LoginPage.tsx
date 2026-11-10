@@ -17,7 +17,7 @@ function greeting(): string {
 }
 
 const primaryBtn =
-  'flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:brightness-110 disabled:opacity-60'
+  'flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 font-bold text-on-primary shadow-sm transition hover:brightness-110 disabled:opacity-60'
 
 export default function LoginPage() {
   const { session, hasAccess } = useAuth()
@@ -138,9 +138,8 @@ export default function LoginPage() {
     <AuthShell>
       <form onSubmit={onSignIn} className="space-y-5">
         <div>
-          <p className="text-sm font-semibold text-primary">{greeting()} 👋</p>
-          <h1 className="mt-1 font-display text-3xl font-bold">Welcome back</h1>
-          <p className="mt-1 text-sm text-muted">We’re glad to see you. Sign in to pick up where you left off.</p>
+          <h1 className="font-display text-3xl font-bold">{greeting()}, Admin</h1>
+          <p className="mt-1 text-sm text-muted">Welcome back. Sign in to pick up where you left off.</p>
         </div>
 
         <FloatingInput

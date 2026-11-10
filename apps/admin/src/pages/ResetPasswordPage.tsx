@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/useAuth'
 
 const primaryBtn =
-  'flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:brightness-110 disabled:opacity-60'
+  'flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 font-bold text-on-primary shadow-sm transition hover:brightness-110 disabled:opacity-60'
 
 /** Landing page for the link in the password-reset email. */
 export default function ResetPasswordPage() {
