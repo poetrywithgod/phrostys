@@ -7,9 +7,13 @@ import { NAV } from './layout/nav'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import SettingsLayout from './features/catalog/SettingsLayout'
+import ProductsPage from './features/catalog/ProductsPage'
+import CategoriesPage from './features/catalog/CategoriesPage'
+import SuppliersPage from './features/catalog/SuppliersPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 
-const ownerOnly = NAV.filter((n) => n.roles.length === 1)
+const ownerOnly = NAV.filter((n) => n.roles.length === 1 && n.to !== '/settings')
 const everyone = NAV.filter((n) => n.roles.length > 1 && n.to !== '/')
 
 export default function App() {
@@ -29,6 +33,12 @@ export default function App() {
                 <Route key={n.to} path={n.to} element={<PlaceholderPage title={n.label} description={n.description} />} />
               ))}
               <Route element={<RequireRole roles={['owner']} />}>
+                <Route path="/settings" element={<SettingsLayout />}>
+                  <Route index element={<Navigate to="products" replace />} />
+                  <Route path="products" element={<ProductsPage />} />
+                  <Route path="categories" element={<CategoriesPage />} />
+                  <Route path="suppliers" element={<SuppliersPage />} />
+                </Route>
                 {ownerOnly.map((n) => (
                   <Route key={n.to} path={n.to} element={<PlaceholderPage title={n.label} description={n.description} />} />
                 ))}
