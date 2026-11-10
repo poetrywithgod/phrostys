@@ -17,7 +17,12 @@ export function explain(err: unknown, what = 'item'): string {
   const code = (err as { code?: string } | null)?.code
   if (code === '23505') return `Another ${what} with these details already exists.`
   if (code === '23503') return `This ${what} is already used by other records, so it can’t be removed. Switch it off instead.`
-  if (code === '42501') return 'Only the owner can do that.'
+  if (code === '42501') return 'You don’t have permission to do that.'
+  if (code === 'P0001') {
+    const message = (err as Error).message
+    if (message.startsWith('Not enough stock')) return 'There isn’t enough stock for that. Check the quantity.'
+    return message
+  }
   if (code === '23514') return 'One of the numbers is not allowed (check for negative values).'
   return 'Something went wrong. Check your connection and try again.'
 }

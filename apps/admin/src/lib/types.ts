@@ -32,3 +32,17 @@ export interface ProductImage {
   path: string
   sort_order: number
 }
+
+export interface StockLevel {
+  product_id: string
+  quantity: number
+}
+
+export interface StockMovement {
+  id: number
+  movement_type: 'purchase' | 'sale' | 'adjustment' | 'count_correction' | 'opening_stock' | 'return'
+  quantity_change: number
+  reason: string | null
+  created_by: string | null
+  created_at: string
+}

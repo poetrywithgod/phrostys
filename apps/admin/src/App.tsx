@@ -11,10 +11,14 @@ import SettingsLayout from './features/catalog/SettingsLayout'
 import ProductsPage from './features/catalog/ProductsPage'
 import CategoriesPage from './features/catalog/CategoriesPage'
 import SuppliersPage from './features/catalog/SuppliersPage'
+import StockPage from './features/stock/StockPage'
+import StockCountPage from './features/stock/StockCountPage'
+import PurchasesPage from './features/purchases/PurchasesPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 
 const ownerOnly = NAV.filter((n) => n.roles.length === 1 && n.to !== '/settings')
-const everyone = NAV.filter((n) => n.roles.length > 1 && n.to !== '/')
+const built = new Set(['/', '/stock', '/purchases'])
+const everyone = NAV.filter((n) => n.roles.length > 1 && !built.has(n.to))
 
 export default function App() {
   const { loading } = useAuth()
@@ -29,6 +33,9 @@ export default function App() {
           <Route element={<RequireAccess />}>
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
+              <Route path="/stock" element={<StockPage />} />
+              <Route path="/stock/count" element={<StockCountPage />} />
+              <Route path="/purchases" element={<PurchasesPage />} />
               {everyone.map((n) => (
                 <Route key={n.to} path={n.to} element={<PlaceholderPage title={n.label} description={n.description} />} />
               ))}

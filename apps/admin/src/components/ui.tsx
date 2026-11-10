@@ -29,7 +29,14 @@ export function ErrorNote({ children }: { children: ReactNode }) {
 }
 
 /** A centred dialog built on the native <dialog> element (Esc closes, focus is trapped by the browser). */
-export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Modal({
+  title, onClose, children, wide,
+}: {
+  title: string
+  onClose: () => void
+  children: ReactNode
+  wide?: boolean
+}) {
   const ref = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {
@@ -42,7 +49,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
       ref={ref}
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl border border-border bg-surface p-0 text-text shadow-2xl backdrop:bg-black/50"
+      className={`m-auto w-[calc(100%-2rem)] ${wide ? 'max-w-3xl' : 'max-w-lg'} rounded-2xl border border-border bg-surface p-0 text-text shadow-2xl backdrop:bg-black/50`}
     >
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <h2 className="font-display text-lg font-bold">{title}</h2>
