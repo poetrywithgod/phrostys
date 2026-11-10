@@ -25,3 +25,10 @@ export interface Product {
   wholesale_price: number | null
   is_active: boolean
 }
+
+export interface ProductImage {
+  id: string
+  product_id: string
+  path: string
+  sort_order: number
+}

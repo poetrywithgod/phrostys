@@ -1,13 +1,15 @@
-import { useMemo, useState, type FormEvent } from 'react'
-import { Package, Pencil, Plus, Search } from 'lucide-react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
+import { ImageOff, Package, Pencil, Plus, Search } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { explain, q, useLoad } from '../../lib/db'
 import { formatNaira } from '../../lib/format'
-import type { Category, Product, Supplier } from '../../lib/types'
+import { IMAGE_BUCKET, extensionFor, imageUrl } from '../../lib/images'
+import type { Category, Product, ProductImage, Supplier } from '../../lib/types'
+import PhotoPicker, { type PhotoItem } from './PhotoPicker'
 import { EmptyState, ErrorNote, Field, Modal, StatusPill, fieldClass, ghostBtn, primaryBtn } from '../../components/ui'
 
 const loadCatalog = async () => {
-  const [products, categories, suppliers] = await Promise.all([
+  const [products, categories, suppliers, images] = await Promise.all([
     q<Product[]>(
       supabase
         .from('products')
@@ -16,8 +18,9 @@ const loadCatalog = async () => {
     ),
     q<Category[]>(supabase.from('categories').select('id,name').order('name')),
     q<Pick<Supplier, 'id' | 'name'>[]>(supabase.from('suppliers').select('id,name').order('name')),
+    q<ProductImage[]>(supabase.from('product_images').select('id,product_id,path,sort_order').order('sort_order')),
   ])
-  return { products, categories, suppliers }
+  return { products, categories, suppliers, images }
 }
 
 const UNITS = ['bag', 'carton', 'kg', 'piece', 'pack', 'bottle', 'litre', 'crate', 'dozen']
@@ -56,15 +59,20 @@ const fromProduct = (p: Product): Draft => ({
 })
 
 function ProductForm({
-  initial, categories, suppliers, onDone, onClose,
+  initial, categories, suppliers, images, onDone, onClose,
 }: {
   initial: Draft
   categories: Category[]
   suppliers: Pick<Supplier, 'id' | 'name'>[]
+  images: ProductImage[]
   onDone: () => void
   onClose: () => void
 }) {
   const [d, setD] = useState(initial)
+  const [photos, setPhotos] = useState<PhotoItem[]>(() =>
+    images.map((i) => ({ key: i.id, id: i.id, path: i.path, url: imageUrl(i.path) })),
+  )
+  const saved = useRef<{ productId: string | undefined; photos: ProductImage[] }>({ productId: initial.id, photos: images })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((prev) => ({ ...prev, [k]: v }))
@@ -86,11 +94,55 @@ function ProductForm({
       is_active: d.is_active,
     }
     try {
-      await q(d.id ? supabase.from('products').update(row).eq('id', d.id) : supabase.from('products').insert(row))
+      let productId = saved.current.productId
+      if (productId) {
+        await q(supabase.from('products').update(row).eq('id', productId))
+      } else {
+        productId = (await q<{ id: string }>(supabase.from('products').insert(row).select('id').single())).id
+        saved.current.productId = productId
+      }
+      await savePhotos(productId)
       onDone()
     } catch (err) {
-      setError(explain(err, 'product'))
+      setError(
+        saved.current.productId && !initial.id
+          ? 'The product was saved, but a photo could not be uploaded. Press Save again to retry.'
+          : explain(err, 'product'),
+      )
       setBusy(false)
+    }
+  }
+
+  /** Removes dropped photos, uploads new ones, then writes the final order (first = cover). */
+  async function savePhotos(productId: string) {
+    const keepIds = new Set(photos.filter((p) => p.id).map((p) => p.id))
+    const dropped = saved.current.photos.filter((p) => !keepIds.has(p.id))
+    if (dropped.length) {
+      await q(supabase.from('product_images').delete().in('id', dropped.map((p) => p.id)))
+      await supabase.storage.from(IMAGE_BUCKET).remove(dropped.map((p) => p.path))
+      saved.current.photos = saved.current.photos.filter((p) => keepIds.has(p.id))
+    }
+
+    const current = [...photos]
+    for (let i = 0; i < current.length; i++) {
+      const item = current[i]
+      if (item.blob) {
+        const path = `${productId}/${crypto.randomUUID()}.${extensionFor(item.blob)}`
+        const { error: uploadError } = await supabase.storage.from(IMAGE_BUCKET).upload(path, item.blob, { contentType: item.blob.type })
+        if (uploadError) throw uploadError
+        const row = await q<{ id: string }>(
+          supabase.from('product_images').insert({ product_id: productId, path, sort_order: i }).select('id').single(),
+        )
+        current[i] = { key: item.key, id: row.id, path, url: item.url }
+        saved.current.photos.push({ id: row.id, product_id: productId, path, sort_order: i })
+        setPhotos([...current])
+      } else if (item.id) {
+        const before = saved.current.photos.find((p) => p.id === item.id)
+        if (before && before.sort_order !== i) {
+          await q(supabase.from('product_images').update({ sort_order: i }).eq('id', item.id))
+          before.sort_order = i
+        }
+      }
     }
   }
 
@@ -151,6 +203,8 @@ function ProductForm({
         </Field>
       </div>
 
+      <PhotoPicker items={photos} onChange={setPhotos} disabled={busy} />
+
       <label className="flex items-center gap-3 text-sm font-semibold">
         <input type="checkbox" className="h-4 w-4 accent-[var(--primary)]" checked={d.is_active} onChange={(e) => set('is_active', e.target.checked)} />
         Currently sold
@@ -175,6 +229,11 @@ export default function ProductsPage() {
   const [showOff, setShowOff] = useState(false)
 
   const categoryName = useMemo(() => new Map(data?.categories.map((c) => [c.id, c.name])), [data])
+  const coverOf = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const i of data?.images ?? []) if (!m.has(i.product_id)) m.set(i.product_id, imageUrl(i.path))
+    return m
+  }, [data])
   const supplierName = useMemo(() => new Map(data?.suppliers.map((s) => [s.id, s.name])), [data])
 
   const rows = useMemo(() => {
@@ -254,9 +313,20 @@ export default function ProductsPage() {
                 {rows.map((p) => (
                   <tr key={p.id} className="hover:bg-highlight/40">
                     <td className="px-4 py-3">
-                      <div className="font-semibold">{p.name}</div>
-                      <div className="text-xs text-muted">
-                        {[p.sku, p.supplier_id && supplierName.get(p.supplier_id)].filter(Boolean).join(' · ')}
+                      <div className="flex items-center gap-3">
+                        {coverOf.get(p.id) ? (
+                          <img src={coverOf.get(p.id)} alt="" loading="lazy" className="h-11 w-11 shrink-0 rounded-lg border border-border object-cover" />
+                        ) : (
+                          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-highlight text-muted">
+                            <ImageOff size={18} />
+                          </span>
+                        )}
+                        <div>
+                          <div className="font-semibold">{p.name}</div>
+                          <div className="text-xs text-muted">
+                            {[p.sku, p.supplier_id && supplierName.get(p.supplier_id)].filter(Boolean).join(' · ')}
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted">{(p.category_id && categoryName.get(p.category_id)) || '—'}</td>
@@ -292,6 +362,7 @@ export default function ProductsPage() {
             initial={draft}
             categories={data.categories}
             suppliers={data.suppliers}
+            images={data.images.filter((i) => i.product_id === draft.id)}
             onClose={() => setDraft(null)}
             onDone={() => {
               setDraft(null)
