@@ -1,8 +1,23 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import Logo from '../components/Logo'
+import { ArrowLeft, Loader2, MailCheck } from 'lucide-react'
+import AuthShell from '../components/AuthShell'
+import FloatingInput from '../components/FloatingInput'
+import PasswordInput from '../components/PasswordInput'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/useAuth'
+
+type Mode = 'signin' | 'forgot' | 'sent'
+
+function greeting(): string {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+const primaryBtn =
+  'flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3.5 font-bold text-on-primary shadow-lg shadow-primary/20 transition hover:brightness-110 disabled:opacity-60'
 
 export default function LoginPage() {
   const { session, hasAccess } = useAuth()
@@ -10,6 +25,7 @@ export default function LoginPage() {
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? '/'
 
+  const [mode, setMode] = useState<Mode>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -17,7 +33,12 @@ export default function LoginPage() {
 
   if (session && hasAccess) return <Navigate to="/" replace />
 
-  async function onSubmit(e: FormEvent) {
+  function switchMode(next: Mode) {
+    setMode(next)
+    setError(null)
+  }
+
+  async function onSignIn(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
     setError(null)
@@ -26,63 +47,139 @@ export default function LoginPage() {
     if (signInError) {
       setError(
         signInError.message.toLowerCase().includes('invalid')
-          ? 'Wrong email or password.'
-          : 'We could not sign you in. Check your connection and try again.',
+          ? 'That email and password don’t match. Please try again.'
+          : 'We couldn’t sign you in. Check your connection and try again.',
       )
       return
     }
     navigate(from, { replace: true })
   }
 
-  return (
-    <div className="grid min-h-screen place-items-center bg-bg px-4 text-text">
-      <div className="w-full max-w-sm">
-        <Logo className="mx-auto mb-8 h-20 w-auto text-primary" />
-        <form onSubmit={onSubmit} className="space-y-4 rounded-2xl border border-border bg-surface p-6 shadow-sm">
-          <div>
-            <h1 className="font-display text-2xl font-bold">Sign in</h1>
-            <p className="mt-1 text-sm text-muted">Business admin for you and your team.</p>
+  async function onForgot(e: FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    setBusy(false)
+    if (resetError) {
+      setError(
+        resetError.status === 429
+          ? 'Too many requests. Please wait a few minutes and try again.'
+          : 'We couldn’t send the email. Check your connection and try again.',
+      )
+      return
+    }
+    switchMode('sent')
+  }
+
+  if (mode === 'sent') {
+    return (
+      <AuthShell>
+        <div className="text-center">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-highlight text-primary">
+            <MailCheck size={28} />
           </div>
+          <h1 className="font-display text-2xl font-bold">Check your email</h1>
+          <p className="mt-2 text-sm text-muted">
+            If there’s an account for <span className="font-semibold text-text">{email.trim()}</span>, we’ve sent a link to
+            choose a new password. It may take a minute to arrive — check spam too.
+          </p>
+          <button
+            onClick={() => switchMode('signin')}
+            className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+          >
+            <ArrowLeft size={16} /> Back to sign in
+          </button>
+        </div>
+      </AuthShell>
+    )
+  }
 
-          <label className="block text-sm font-semibold">
-            Email
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-border bg-bg px-3 py-2.5 font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
-            />
-          </label>
-
-          <label className="block text-sm font-semibold">
-            Password
-            <input
-              type="password"
-              required
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-border bg-bg px-3 py-2.5 font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
-            />
-          </label>
-
+  if (mode === 'forgot') {
+    return (
+      <AuthShell>
+        <form onSubmit={onForgot} className="space-y-5">
+          <div>
+            <h1 className="font-display text-2xl font-bold">Forgot your password?</h1>
+            <p className="mt-1 text-sm text-muted">No worries. Enter your email and we’ll send you a link to set a new one.</p>
+          </div>
+          <FloatingInput
+            label="Email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           {error && (
             <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm font-semibold text-danger">
               {error}
             </p>
           )}
-
+          <button type="submit" disabled={busy} className={primaryBtn}>
+            {busy && <Loader2 size={18} className="animate-spin" />}
+            {busy ? 'Sending…' : 'Send reset link'}
+          </button>
           <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-xl bg-primary px-4 py-3 font-bold text-on-primary transition-opacity disabled:opacity-60"
+            type="button"
+            onClick={() => switchMode('signin')}
+            className="mx-auto flex items-center gap-2 text-sm font-semibold text-muted hover:text-text"
           >
-            {busy ? 'Signing in…' : 'Sign in'}
+            <ArrowLeft size={16} /> Back to sign in
           </button>
         </form>
-      </div>
-    </div>
+      </AuthShell>
+    )
+  }
+
+  return (
+    <AuthShell>
+      <form onSubmit={onSignIn} className="space-y-5">
+        <div>
+          <p className="text-sm font-semibold text-primary">{greeting()} 👋</p>
+          <h1 className="mt-1 font-display text-3xl font-bold">Welcome back</h1>
+          <p className="mt-1 text-sm text-muted">We’re glad to see you. Sign in to pick up where you left off.</p>
+        </div>
+
+        <FloatingInput
+          label="Email"
+          type="email"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <PasswordInput
+          label="Password"
+          required
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <div className="-mt-2 text-right">
+          <button
+            type="button"
+            onClick={() => switchMode('forgot')}
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
+
+        {error && (
+          <p role="alert" className="rounded-xl bg-danger/10 px-3 py-2 text-sm font-semibold text-danger">
+            {error}
+          </p>
+        )}
+
+        <button type="submit" disabled={busy} className={primaryBtn}>
+          {busy && <Loader2 size={18} className="animate-spin" />}
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
+      </form>
+    </AuthShell>
   )
 }

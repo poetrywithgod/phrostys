@@ -7,6 +7,7 @@ import { NAV } from './layout/nav'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 const ownerOnly = NAV.filter((n) => n.roles.length === 1)
 const everyone = NAV.filter((n) => n.roles.length > 1 && n.to !== '/')
@@ -20,6 +21,7 @@ export default function App() {
       {!loading && (
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route element={<RequireAccess />}>
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />

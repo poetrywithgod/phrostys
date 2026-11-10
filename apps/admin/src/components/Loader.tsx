@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
+import Logo from './Logo'
 
 const SEEN_KEY = 'phrostys-loader-seen'
-const FONT_WAIT_MS = 1500 // never wait longer than this for Ewofi
-const WRITE_FALLBACK_MS = 3200 // if the animation event never fires (reduced motion)
-const HOLD_MS = 350 // short pause once the word is written
+const WRITE_FALLBACK_MS = 3400 // if the animation event never fires (reduced motion)
+const HOLD_MS = 450 // a short pause once the logo is fully written
 const HARD_CAP_MS = 8000 // open no matter what after this
 const WIPE_MS = 900
 
-type Phase = 'font' | 'writing' | 'holding' | 'open' | 'gone'
+type Phase = 'writing' | 'holding' | 'open' | 'gone'
 
 function alreadySeen(): boolean {
   try {
@@ -18,24 +18,13 @@ function alreadySeen(): boolean {
 }
 
 /**
- * Full-screen opening animation: "Phrostys" is written across the screen in
- * Ewofi, then the screen wipes upward to reveal the app. Plays once per
- * browser session, and waits for the app to be ready before opening.
+ * Full-screen opening animation: the Phrostys logo is written across the
+ * screen, then the screen wipes upward to reveal the app. It plays once per
+ * browser session and waits for the app to be ready before opening. The logo
+ * takes the theme colour (deep green in light mode, lime in dark mode).
  */
 export default function Loader({ ready }: { ready: boolean }) {
-  const [phase, setPhase] = useState<Phase>(() => (alreadySeen() ? 'gone' : 'font'))
-
-  // Wait for the display font so the word never writes in a fallback face.
-  useEffect(() => {
-    if (phase !== 'font') return
-    let live = true
-    const go = () => live && setPhase('writing')
-    const wait = new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS))
-    Promise.race([document.fonts?.load('700 1em "Ewofi"') ?? Promise.resolve(), wait]).then(go, go)
-    return () => {
-      live = false
-    }
-  }, [phase])
+  const [phase, setPhase] = useState<Phase>(() => (alreadySeen() ? 'gone' : 'writing'))
 
   useEffect(() => {
     if (phase !== 'writing') return
@@ -69,18 +58,16 @@ export default function Loader({ ready }: { ready: boolean }) {
 
   if (phase === 'gone') return null
 
-  const writing = phase === 'writing' || phase === 'holding' || phase === 'open'
   return (
     <div
-      className={`loader${writing ? ' is-writing' : ''}${phase === 'open' ? ' is-open' : ''}`}
+      className={`loader is-writing${phase === 'open' ? ' is-open' : ''}`}
       role="status"
       aria-label="Loading Phrostys"
     >
-      <div className="loader-inner">
-        <h1 className="loader-word" onAnimationEnd={() => setPhase((p) => (p === 'writing' ? 'holding' : p))}>
-          Phrostys
-        </h1>
-      </div>
+      <Logo
+        className="loader-logo"
+        onAnimationEnd={() => setPhase((p) => (p === 'writing' ? 'holding' : p))}
+      />
     </div>
   )
 }
