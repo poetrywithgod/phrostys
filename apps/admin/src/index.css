@@ -23,6 +23,15 @@
   --highlight: #E2F0CC;
   --danger: #B42318;
   --warning: #B54708;
+
+  /* Sidebar: deep green with lime accent, the same in both modes */
+  --sidebar: #012F13;
+  --sidebar-text: #E2F0CC;
+  --sidebar-muted: #A9BC95;
+  --sidebar-hover: #0B4A22;
+  --sidebar-active: #CCFF00;
+  --sidebar-active-text: #011207;
+  --sidebar-logo: #CCFF00;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -49,6 +58,13 @@
   --color-highlight: var(--highlight);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-text: var(--sidebar-active-text);
+  --color-sidebar-logo: var(--sidebar-logo);
   --font-display: "Ewofi", "Arial Black", Impact, sans-serif;
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -58,4 +74,95 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
+}
+
+/* ---------------------------------------------------------------------------
+   Opening loader: "Phrostys" is written across the screen, then the screen
+   wipes upward. The word is live text in Ewofi, revealed by a soft-edged mask.
+   --------------------------------------------------------------------------- */
+@property --p {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.85s cubic-bezier(0.77, 0, 0.18, 1);
+}
+.loader.is-open {
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+}
+.loader-inner {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+.loader-word {
+  display: inline-block;
+  margin: 0;
+  padding: 0.05em 0.12em 0.24em; /* room for the descender on the "y" */
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3rem, 15vw, 8rem);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: var(--primary);
+  --p: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 1% - 14%), transparent calc(var(--p) * 1%));
+  mask-image: linear-gradient(90deg, #000 calc(var(--p) * 1% - 14%), transparent calc(var(--p) * 1%));
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.loader-inner::after {
+  content: '';
+  position: absolute;
+  left: 0.12em;
+  right: 0.12em;
+  bottom: 0;
+  height: 3px;
+  background: var(--primary);
+  opacity: 0.35;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.loader.is-writing .loader-word {
+  animation: loader-write 1.9s cubic-bezier(0.45, 0.05, 0.25, 1) 0.15s forwards;
+}
+.loader.is-writing .loader-inner::after {
+  animation: loader-sweep 1.9s cubic-bezier(0.45, 0.05, 0.25, 1) 0.15s forwards;
+}
+@keyframes loader-write {
+  to {
+    --p: 114;
+  }
+}
+@keyframes loader-sweep {
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader-word {
+    --p: 114;
+    animation: none !important;
+  }
+  .loader-inner::after {
+    transform: none;
+    animation: none !important;
+  }
+  .loader {
+    clip-path: none;
+    transition: opacity 0.3s;
+  }
+  .loader.is-open {
+    opacity: 0;
+  }
 }

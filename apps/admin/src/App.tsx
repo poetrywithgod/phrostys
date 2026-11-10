@@ -1,24 +1,41 @@
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useAuth } from './auth/useAuth'
+import { RequireAccess, RequireRole } from './auth/guards'
+import Loader from './components/Loader'
+import AppLayout from './layout/AppLayout'
+import { NAV } from './layout/nav'
+import DashboardPage from './pages/DashboardPage'
+import LoginPage from './pages/LoginPage'
+import PlaceholderPage from './pages/PlaceholderPage'
+
+const ownerOnly = NAV.filter((n) => n.roles.length === 1)
+const everyone = NAV.filter((n) => n.roles.length > 1 && n.to !== '/')
+
 export default function App() {
-  const toggle = () => {
-    const r = document.documentElement
-    const dark = r.dataset.theme
-      ? r.dataset.theme === 'dark'
-      : matchMedia('(prefers-color-scheme: dark)').matches
-    r.dataset.theme = dark ? 'light' : 'dark'
-  }
+  const { loading } = useAuth()
 
   return (
-    <div className="min-h-screen bg-bg text-text">
-      <header className="flex items-center justify-between border-b border-border bg-surface px-6 py-4">
-        <span className="font-display text-2xl font-bold text-primary">Phrostys</span>
-        <button onClick={toggle} className="rounded-full bg-primary px-4 py-2 font-semibold text-on-primary">
-          Toggle theme
-        </button>
-      </header>
-      <main className="p-6">
-        <h1 className="font-display text-4xl font-bold">Admin app</h1>
-        <p className="mt-2 text-muted">Theme tokens are working if this looks right in both modes.</p>
-      </main>
-    </div>
+    <>
+      <Loader ready={!loading} />
+      {!loading && (
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<RequireAccess />}>
+            <Route element={<AppLayout />}>
+              <Route index element={<DashboardPage />} />
+              {everyone.map((n) => (
+                <Route key={n.to} path={n.to} element={<PlaceholderPage title={n.label} description={n.description} />} />
+              ))}
+              <Route element={<RequireRole roles={['owner']} />}>
+                {ownerOnly.map((n) => (
+                  <Route key={n.to} path={n.to} element={<PlaceholderPage title={n.label} description={n.description} />} />
+                ))}
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Route>
+        </Routes>
+      )}
+    </>
   )
 }
