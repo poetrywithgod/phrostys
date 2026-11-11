@@ -18,9 +18,10 @@ import SalesPage from './features/sales/SalesPage'
 import SaleFormPage from './features/sales/SaleFormPage'
 import DebtorsPage from './features/debtors/DebtorsPage'
 import CustomersPage from './features/customers/CustomersPage'
+import ReportsPage from './features/reports/ReportsPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 
-const ownerOnly = NAV.filter((n) => n.roles.length === 1 && n.to !== '/settings')
+const ownerOnly = NAV.filter((n) => n.roles.length === 1 && n.to !== '/settings' && n.to !== '/reports')
 const built = new Set(['/', '/stock', '/purchases', '/sales', '/debtors', '/customers'])
 const everyone = NAV.filter((n) => n.roles.length > 1 && !built.has(n.to))
 
@@ -54,6 +55,7 @@ export default function App() {
                   <Route path="categories" element={<CategoriesPage />} />
                   <Route path="suppliers" element={<SuppliersPage />} />
                 </Route>
+                <Route path="/reports" element={<ReportsPage />} />
                 {ownerOnly.map((n) => (
                   <Route key={n.to} path={n.to} element={<PlaceholderPage title={n.label} description={n.description} />} />
                 ))}
