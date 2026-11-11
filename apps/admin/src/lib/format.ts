@@ -23,6 +23,24 @@ export function periodStart(period: Period, now = new Date()): Date {
   return d
 }
 
+/** End of the period: the Monday after this week, the 1st of next month, or tomorrow. */
+export function periodEnd(period: Period, now = new Date()): Date {
+  const d = periodStart(period, now)
+  if (period === 'week') d.setDate(d.getDate() + 7)
+  else if (period === 'month') d.setMonth(d.getMonth() + 1)
+  else d.setDate(d.getDate() + 1)
+  return d
+}
+
+/** 1250000 -> "₦1.3M", 48000 -> "₦48k", 900 -> "₦900" (for chart axes). */
+export function compactNaira(value: number): string {
+  const n = Math.abs(value)
+  const sign = value < 0 ? '-' : ''
+  if (n >= 1e6) return `${sign}₦${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, '')}M`
+  if (n >= 1e3) return `${sign}₦${Math.round(n / 1e3)}k`
+  return `${sign}₦${Math.round(n)}`
+}
+
 const quantity = new Intl.NumberFormat('en-NG', { maximumFractionDigits: 3 })
 
 /** 1250.5 -> "1,250.5" */
