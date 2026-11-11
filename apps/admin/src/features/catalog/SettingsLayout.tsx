@@ -4,6 +4,7 @@ const TABS = [
   { to: '/settings/products', label: 'Products' },
   { to: '/settings/categories', label: 'Categories' },
   { to: '/settings/suppliers', label: 'Suppliers' },
+  { to: '/settings/staff', label: 'Staff' },
 ]
 
 export default function SettingsLayout() {

@@ -18,6 +18,7 @@ import SalesPage from './features/sales/SalesPage'
 import SaleFormPage from './features/sales/SaleFormPage'
 import DebtorsPage from './features/debtors/DebtorsPage'
 import CustomersPage from './features/customers/CustomersPage'
+import StaffPage from './features/catalog/StaffPage'
 import ReportsPage from './features/reports/ReportsPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 
@@ -54,6 +55,7 @@ export default function App() {
                   <Route path="products" element={<ProductsPage />} />
                   <Route path="categories" element={<CategoriesPage />} />
                   <Route path="suppliers" element={<SuppliersPage />} />
+                  <Route path="staff" element={<StaffPage />} />
                 </Route>
                 <Route path="/reports" element={<ReportsPage />} />
                 {ownerOnly.map((n) => (
