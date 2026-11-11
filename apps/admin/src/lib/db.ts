@@ -12,6 +12,9 @@ export async function q<T>(query: PromiseLike<DbResult<T>>): Promise<T> {
   return data as T
 }
 
+/** A to-one link can arrive as an object or, from an untyped client, a one-item list. */
+export const one = <T,>(x: T | T[] | null | undefined): T | null => (Array.isArray(x) ? (x[0] ?? null) : (x ?? null))
+
 /** A short, human message for a failed save. */
 export function explain(err: unknown, what = 'item'): string {
   const code = (err as { code?: string } | null)?.code

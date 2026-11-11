@@ -46,3 +46,21 @@ export interface StockMovement {
   created_by: string | null
   created_at: string
 }
+
+export interface Customer {
+  id: string
+  full_name: string
+  phone: string | null
+}
+
+export type PaymentType = 'cash' | 'transfer' | 'credit'
+export type PaymentMethod = 'cash' | 'transfer' | 'card'
+
+export interface OpenSale {
+  id: string
+  sale_number: number
+  sold_at: string
+  total: number
+  amount_paid: number
+  balance: number
+}
