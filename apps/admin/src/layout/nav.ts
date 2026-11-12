@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Settings,
   ShoppingCart,
+  Star,
   Truck,
   Users,
   type LucideIcon,
@@ -30,6 +31,7 @@ export const NAV: NavItem[] = [
   { to: '/stock', label: 'Stock', icon: Boxes, roles: BOTH, description: 'Live stock, low-stock alerts, adjustments and stock counts.' },
   { to: '/customers', label: 'Customers', icon: Users, roles: BOTH, description: 'Customer list, buying history and who is going quiet.' },
   { to: '/debtors', label: 'Debtors', icon: HandCoins, roles: BOTH, description: 'Who owes you, how much, and part payments.' },
+  { to: '/reviews', label: 'Reviews', icon: Star, roles: BOTH, description: 'Approve or reject what customers say about you.' },
   { to: '/reports', label: 'Reports', icon: ChartColumn, roles: OWNER, description: 'Profit, best customers and best-selling products.' },
   { to: '/settings', label: 'Settings', icon: Settings, roles: OWNER, description: 'Products, suppliers, staff and profit method.' },
 ]
