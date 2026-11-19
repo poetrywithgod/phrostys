@@ -1,7 +1,9 @@
 /**
- * Shop details shown around the website. Edit these to match the real business;
- * nothing here is secret. (Later steps move delivery fees and bank details into
- * the database so the owner can change them from the admin app.)
+ * Shop details and wording for the website. Edit these to match the real
+ * business; nothing here is secret. (Later steps move delivery fees and bank
+ * details into the database so the owner can change them from the admin app.)
+ *
+ * The wording below is a first draft: replace it with the client's own words.
  */
 export const shop = {
   name: 'Phrostys',
@@ -12,3 +14,29 @@ export const shop = {
   address: 'Shop address goes here, Port Harcourt',
   hours: 'Mon to Sat, 8am to 6pm',
 } as const
+
+export const hero = {
+  title: 'Everything you need,',
+  emphasis: 'delivered fresh.',
+  text: 'Browse our range, pay securely online, and choose delivery or pickup. It takes a couple of minutes.',
+} as const
+
+export const features = [
+  { icon: 'shield', title: 'Quality you can trust', text: 'Carefully sourced products that meet our standard, every time.' },
+  { icon: 'grid', title: 'Wide selection', text: 'From everyday essentials to bulk buys, find what you need in one place.' },
+  { icon: 'truck', title: 'Fast, reliable delivery', text: 'Ordered today, at your door soon. Or pick up from our shop.' },
+  { icon: 'wallet', title: 'Pay your way', text: 'Card, bank transfer, Opay, Kuda, PalmPay, Moniepoint and more.' },
+] as const
+
+export const about = {
+  title: 'About us',
+  text: 'Our goal is simple: to give you good products at fair prices, with service you can count on. Whether you shop in store or online, we treat every order with the same care.',
+} as const
+
+export const faqs = [
+  { q: 'Do you deliver?', a: 'Yes. Choose delivery at checkout and we bring your order to your address. Delivery fees depend on your location and are shown before you pay.' },
+  { q: 'Can I pick up my order instead?', a: 'Yes. Choose pickup at checkout and collect from our shop during opening hours.' },
+  { q: 'How can I pay?', a: 'You can pay by card or bank transfer, including from Opay, Kuda, PalmPay, Moniepoint and other bank apps.' },
+  { q: 'What if something I want is sold out?', a: 'Sold-out items are marked on the shop page. Message us on WhatsApp and we’ll tell you when it’s back.' },
+  { q: 'How do I reach you?', a: 'Call, email or message us on WhatsApp. Our details are at the bottom of every page.' },
+] as const

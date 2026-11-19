@@ -79,3 +79,24 @@ export async function fetchReviews(productId: string): Promise<StoreReview[]> {
   if (error) throw error
   return (data ?? []) as StoreReview[]
 }
+
+/** Best sellers of the last 90 days, ranked by the database. Same safe fields as the shop. */
+export async function fetchBestSellers(limit = 8) {
+  const { data, error } = await supabase.rpc('store_best_sellers', { p_limit: limit })
+  if (error) throw error
+  return ((data ?? []) as StoreListProduct[]).map(clean)
+}
+
+export type StoreLatestReview = StoreReview & { product_id: string | null }
+
+/** The newest approved reviews across the whole shop. */
+export async function fetchLatestReviews(limit = 3): Promise<StoreLatestReview[]> {
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('id,product_id,reviewer_name,rating,title,body,reply,created_at')
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return (data ?? []) as StoreLatestReview[]
+}

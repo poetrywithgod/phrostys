@@ -10,8 +10,13 @@ import ProductPage from './pages/ProductPage'
 import ShopPage from './pages/ShopPage'
 
 function ScrollToTop() {
-  const { pathname } = useLocation()
-  useEffect(() => window.scrollTo(0, 0), [pathname])
+  const { pathname, hash } = useLocation()
+  useEffect(() => {
+    // A link like /#about scrolls to that section; any other page change starts at the top.
+    const target = hash ? document.getElementById(hash.slice(1)) : null
+    if (target) target.scrollIntoView()
+    else window.scrollTo(0, 0)
+  }, [pathname, hash])
   return null
 }
 

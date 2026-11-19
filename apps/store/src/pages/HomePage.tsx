@@ -1,106 +1,218 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, CreditCard, Store, Truck } from 'lucide-react'
+import { ArrowRight, CreditCard, LayoutGrid, Minus, Plus, ShieldCheck, Truck, type LucideIcon } from 'lucide-react'
+import HeroCarousel, { type Slide } from '../components/HeroCarousel'
 import ProductCard from '../components/ProductCard'
-import { EmptyState, ErrorNote, Skeleton, ghostBtn, primaryBtn } from '../components/ui'
-import { shop } from '../config'
-import { fetchCategories, fetchProducts } from '../lib/api'
+import { ErrorNote, Skeleton, Stars, ghostBtn } from '../components/ui'
+import { about, faqs, features, hero, shop } from '../config'
+import { fetchBestSellers, fetchLatestReviews } from '../lib/api'
+import { formatDate } from '../lib/format'
+import { imageUrl } from '../lib/supabase'
 import { useAsync } from '../lib/useAsync'
 
-const perks = [
-  { icon: Truck, title: 'Delivery to your door', text: 'Order online and we bring it to you.' },
-  { icon: Store, title: 'Free pickup', text: 'Prefer to collect? Pick up from our shop.' },
-  { icon: CreditCard, title: 'Pay your way', text: 'Card, bank transfer, Opay, Kuda, PalmPay, Moniepoint and more.' },
-]
+const icons: Record<(typeof features)[number]['icon'], LucideIcon> = {
+  shield: ShieldCheck,
+  grid: LayoutGrid,
+  truck: Truck,
+  wallet: CreditCard,
+}
+
+const initials = (name: string) =>
+  name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || '?'
 
 export default function HomePage() {
-  const products = useAsync(() => fetchProducts({ limit: 8 }), 'home-products')
-  const categories = useAsync(fetchCategories, 'home-categories')
+  const best = useAsync(() => fetchBestSellers(12), 'home-best')
+  const reviews = useAsync(() => fetchLatestReviews(3), 'home-reviews')
+
+  const withPhotos = (best.data ?? []).filter((p) => p.cover_path)
+  const slides: Slide[] = withPhotos
+    .slice(0, 5)
+    .map((p) => ({ id: p.id, name: p.name, price: p.retail_price, unit: p.unit, image: p.cover_path! }))
+  // A different product photo for the two image panels below the hero.
+  const featurePhoto = withPhotos[5]?.cover_path ?? withPhotos[0]?.cover_path ?? null
+  const aboutPhoto = withPhotos[6]?.cover_path ?? withPhotos[1]?.cover_path ?? featurePhoto
 
   return (
     <>
-      <section className="relative overflow-hidden">
-        <div className="auth-bg" aria-hidden="true">
-          <div className="auth-blob a" />
-          <div className="auth-blob b" />
-          <div className="auth-blob c" />
-        </div>
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
-          <p className="inline-block rounded-full bg-highlight px-4 py-1.5 text-xs font-semibold uppercase tracking-wider">
-            Welcome to {shop.name}
-          </p>
-          <h1 className="mt-5 max-w-2xl font-display text-4xl font-bold leading-tight sm:text-6xl">
-            {shop.tagline}
-          </h1>
-          <p className="mt-4 max-w-xl text-base text-muted sm:text-lg">
-            Browse our range, pay securely online, and choose delivery or pickup. It takes a couple of minutes.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/shop" className={primaryBtn}>
-              Shop now <ArrowRight size={18} />
+      {/* Hero */}
+      <section className="bg-sidebar text-sidebar-text">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:py-16 lg:grid-cols-2 lg:gap-14">
+          <div>
+            <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">
+              {hero.title}
+              <span className="mt-1 block text-5xl font-bold italic text-sidebar-active sm:text-6xl">{hero.emphasis}</span>
+            </h1>
+            <p className="mt-5 max-w-md text-base text-sidebar-muted sm:text-lg">{hero.text}</p>
+            <Link
+              to="/shop"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-sidebar-active px-8 py-3.5 text-base font-semibold text-[#011207] shadow-lg transition hover:brightness-105 active:scale-[0.98]"
+            >
+              Order now <ArrowRight size={18} />
             </Link>
-            <a href={`https://wa.me/${shop.whatsapp}`} target="_blank" rel="noreferrer" className={ghostBtn}>
-              Order on WhatsApp
-            </a>
           </div>
+
+          {best.loading && !best.data ? <Skeleton className="aspect-[4/3] !rounded-[2rem] !bg-white/10" /> : <HeroCarousel slides={slides} />}
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4">
-        <ul className="grid gap-4 sm:grid-cols-3">
-          {perks.map(({ icon: Icon, title, text }) => (
-            <li key={title} className="flex items-start gap-4 rounded-3xl border border-border bg-surface p-5">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-highlight text-primary">
-                <Icon size={22} />
-              </span>
-              <div>
-                <h2 className="font-display text-base font-semibold">{title}</h2>
-                <p className="mt-1 text-sm text-muted">{text}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+      {/* Why us */}
+      <section className="bg-highlight/60">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 md:grid-cols-[1fr_1.6fr]">
+          <div className="hidden md:block">
+            {featurePhoto && (
+              <img
+                src={imageUrl(featurePhoto)}
+                alt=""
+                loading="lazy"
+                className="mx-auto aspect-square w-full max-w-xs rounded-[2rem] border border-border object-cover shadow-lg"
+              />
+            )}
+          </div>
+          <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2">
+            {features.map((f) => {
+              const Icon = icons[f.icon]
+              return (
+                <li key={f.title} className="text-center">
+                  <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-surface text-primary shadow-sm">
+                    <Icon size={24} />
+                  </span>
+                  <h2 className="mt-3 font-display text-lg font-semibold">{f.title}</h2>
+                  <p className="mx-auto mt-1 max-w-[16rem] text-sm text-muted">{f.text}</p>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       </section>
 
-      {categories.data && categories.data.length > 0 && (
-        <section className="mx-auto mt-14 max-w-6xl px-4">
-          <h2 className="font-display text-2xl font-bold">Shop by category</h2>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {categories.data.map((c) => (
-              <Link
-                key={c.id}
-                to={`/shop?category=${c.id}`}
-                className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-semibold transition hover:bg-highlight"
-              >
-                {c.name} <span className="text-muted">({c.product_count})</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="mx-auto mt-14 max-w-6xl px-4">
+      {/* Best sellers */}
+      <section className="mx-auto max-w-6xl px-4 py-16" aria-labelledby="best-heading">
         <div className="flex items-end justify-between gap-4">
-          <h2 className="font-display text-2xl font-bold">Popular right now</h2>
-          <Link to="/shop" className="text-sm font-semibold underline-offset-4 hover:underline">View all</Link>
+          <h2 id="best-heading" className="font-display text-3xl font-bold">Best sellers</h2>
+          <Link to="/shop" className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted transition hover:text-text">
+            See more <ArrowRight size={16} />
+          </Link>
         </div>
-        <div className="mt-5">
-          {products.error && <ErrorNote>We couldn’t load the products. Please refresh and try again.</ErrorNote>}
-          {products.loading && !products.data && (
+        <div className="mt-6">
+          {best.error && <ErrorNote>We couldn’t load the products. Please refresh and try again.</ErrorNote>}
+          {best.loading && !best.data && (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="aspect-[3/4]" />)}
             </div>
           )}
-          {products.data && products.data.length === 0 && (
-            <EmptyState title="Products are on their way">
+          {best.data && best.data.length === 0 && (
+            <p className="rounded-3xl border border-dashed border-border bg-surface/60 px-6 py-10 text-center text-sm text-muted">
               We’re setting up the shop. Please check back very soon.
-            </EmptyState>
+            </p>
           )}
-          {products.data && products.data.length > 0 && (
+          {best.data && best.data.length > 0 && (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {products.data.map((p) => <ProductCard key={p.id} product={p} />)}
+              {best.data.slice(0, 8).map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           )}
         </div>
+      </section>
+
+      {/* About */}
+      <section id="about" className="scroll-mt-20 bg-sidebar text-sidebar-text">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 md:grid-cols-2">
+          <div>
+            <h2 className="font-display text-3xl font-bold">{about.title}</h2>
+            <p className="mt-4 max-w-md text-base leading-relaxed text-sidebar-muted">{about.text}</p>
+            <Link
+              to="/shop"
+              className="mt-7 inline-flex items-center gap-2 rounded-full bg-sidebar-active px-8 py-3.5 text-base font-semibold text-[#011207] transition hover:brightness-105 active:scale-[0.98]"
+            >
+              Shop now
+            </Link>
+          </div>
+          {aboutPhoto && (
+            <img
+              src={imageUrl(aboutPhoto)}
+              alt=""
+              loading="lazy"
+              className="aspect-[4/3] w-full rounded-[2rem] border border-white/20 object-cover shadow-2xl"
+            />
+          )}
+        </div>
+      </section>
+
+      {/* Customer reviews: real, approved reviews only. Hidden until there are some. */}
+      {reviews.data && reviews.data.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 py-16" aria-labelledby="reviews-heading">
+          <div className="grid gap-8 md:grid-cols-[1fr_1.4fr]">
+            <div>
+              <h2 id="reviews-heading" className="font-display text-3xl font-bold">What our customers say</h2>
+              <p className="mt-3 max-w-xs text-sm text-muted">
+                Real reviews from people who’ve shopped with us.
+              </p>
+            </div>
+            <ul className="space-y-4">
+              {reviews.data.map((r, i) => (
+                <li
+                  key={r.id}
+                  className={`flex gap-4 rounded-3xl border border-border bg-surface p-5 ${i % 2 === 1 ? 'md:ml-10' : ''}`}
+                >
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-highlight font-display text-sm font-semibold text-primary" aria-hidden="true">
+                    {initials(r.reviewer_name)}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <p className="font-display font-semibold">{r.reviewer_name}</p>
+                      <Stars value={r.rating} size={14} />
+                    </div>
+                    <p className="mt-1 line-clamp-4 text-sm text-muted">{r.body}</p>
+                    <div className="mt-2 flex items-center gap-3 text-xs text-muted">
+                      <time dateTime={r.created_at}>{formatDate(r.created_at)}</time>
+                      {r.product_id && (
+                        <Link to={`/product/${r.product_id}`} className="font-semibold underline-offset-4 hover:underline">
+                          View product
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {/* FAQ */}
+      <section id="faq" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-16" aria-labelledby="faq-heading">
+        <h2 id="faq-heading" className="font-display text-3xl font-bold">Frequently asked questions</h2>
+        <div className="mt-6 divide-y divide-border border-y border-border">
+          {faqs.map((f, i) => (
+            <details key={f.q} className="group py-1" open={i === 0}>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-1 py-4 font-display text-base font-semibold marker:content-none [&::-webkit-details-marker]:hidden">
+                <span>{i + 1}. {f.q}</span>
+                <Plus size={20} className="shrink-0 group-open:hidden" />
+                <Minus size={20} className="hidden shrink-0 group-open:block" />
+              </summary>
+              <p className="px-1 pb-4 text-sm leading-relaxed text-muted">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      {/* Call to action */}
+      <section className="mx-auto max-w-6xl px-4">
+        <div className="flex flex-col items-start justify-between gap-5 rounded-[2rem] bg-sidebar px-6 py-8 text-sidebar-text sm:flex-row sm:items-center sm:px-10">
+          <div>
+            <p className="text-sm text-sidebar-muted">{shop.name}</p>
+            <p className="font-display text-xl font-semibold sm:text-2xl">{shop.tagline}</p>
+          </div>
+          <Link
+            to="/shop"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-sidebar-active px-8 py-3.5 text-base font-semibold text-[#011207] transition hover:brightness-105 active:scale-[0.98]"
+          >
+            Order now <ArrowRight size={18} />
+          </Link>
+        </div>
+        <p className="mt-4 text-center">
+          <a href={`https://wa.me/${shop.whatsapp}`} target="_blank" rel="noreferrer" className={`${ghostBtn} !py-2.5`}>
+            Prefer to chat? Message us on WhatsApp
+          </a>
+        </p>
       </section>
     </>
   )
