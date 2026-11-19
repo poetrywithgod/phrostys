@@ -13,7 +13,7 @@ const loadCatalog = async () => {
     q<Product[]>(
       supabase
         .from('products')
-        .select('id,name,sku,category_id,supplier_id,unit,pack_size,reorder_level,retail_price,wholesale_price,is_active')
+        .select('id,name,sku,category_id,supplier_id,unit,pack_size,reorder_level,retail_price,wholesale_price,is_active,description,show_online')
         .order('name'),
     ),
     q<Category[]>(supabase.from('categories').select('id,name').order('name')),
@@ -37,11 +37,14 @@ interface Draft {
   retail_price: string
   wholesale_price: string
   is_active: boolean
+  description: string
+  show_online: boolean
 }
 
 const blank: Draft = {
   name: '', sku: '', category_id: '', supplier_id: '', unit: 'piece',
   pack_size: '1', reorder_level: '0', retail_price: '', wholesale_price: '', is_active: true,
+  description: '', show_online: true,
 }
 
 const fromProduct = (p: Product): Draft => ({
@@ -56,6 +59,8 @@ const fromProduct = (p: Product): Draft => ({
   retail_price: String(p.retail_price),
   wholesale_price: p.wholesale_price == null ? '' : String(p.wholesale_price),
   is_active: p.is_active,
+  description: p.description ?? '',
+  show_online: p.show_online ?? true,
 })
 
 function ProductForm({
@@ -92,6 +97,8 @@ function ProductForm({
       retail_price: Number(d.retail_price),
       wholesale_price: d.wholesale_price === '' ? null : Number(d.wholesale_price),
       is_active: d.is_active,
+      description: d.description.trim() || null,
+      show_online: d.show_online,
     }
     try {
       let productId = saved.current.productId
@@ -205,9 +212,18 @@ function ProductForm({
 
       <PhotoPicker items={photos} onChange={setPhotos} disabled={busy} />
 
+      <Field label="Website description" hint="Shown to customers on the product page. Optional.">
+        <textarea rows={3} maxLength={2000} className={fieldClass} value={d.description} onChange={(e) => set('description', e.target.value)} />
+      </Field>
+
       <label className="flex items-center gap-3 text-sm font-semibold">
         <input type="checkbox" className="h-4 w-4 accent-[var(--primary)]" checked={d.is_active} onChange={(e) => set('is_active', e.target.checked)} />
         Currently sold
+      </label>
+
+      <label className="flex items-center gap-3 text-sm font-semibold">
+        <input type="checkbox" className="h-4 w-4 accent-[var(--primary)]" checked={d.show_online} onChange={(e) => set('show_online', e.target.checked)} />
+        Show on the website
       </label>
 
       {error && <ErrorNote>{error}</ErrorNote>}

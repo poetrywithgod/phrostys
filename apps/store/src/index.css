@@ -1,0 +1,193 @@
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+@import "tailwindcss";
+
+/* Poppins everywhere (self-hosted). Poppins has no naira sign, so U+20A6 is drawn
+   from Plus Jakarta Sans, a close geometric match. */
+@font-face {
+  font-family: "Naira"; font-weight: 400 600; font-style: normal; font-display: swap;
+  src: url("@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-500-normal.woff2") format("woff2");
+  unicode-range: U+20A6;
+}
+@font-face {
+  font-family: "Naira"; font-weight: 700 800; font-style: normal; font-display: swap;
+  src: url("@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-700-normal.woff2") format("woff2");
+  unicode-range: U+20A6;
+}
+
+/* Theme tokens: light by default, dark via OS setting or data-theme="dark" */
+:root {
+  --bg: #F6FAEE;
+  --surface: #FFFFFF;
+  --text: #011207;
+  --muted: #5C5C5C;
+  --border: #DCDCDC;
+  --primary: #012F13;
+  --on-primary: #FFFFFF;
+  --accent: #8BC53D;
+  --highlight: #E2F0CC;
+  --danger: #B42318;
+  --warning: #B54708;
+
+  /* Glass surfaces and the soft colour blobs behind them (sign-in screens) */
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-field: rgba(255, 255, 255, 0.55);
+  --glass-field-border: rgba(1, 47, 19, 0.18);
+  --glass-shadow: 0 10px 50px rgba(1, 47, 19, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --page-glow: linear-gradient(160deg, #eef6dc 0%, #f6faee 45%, #e2f0cc 100%);
+  --blob-1: #ccff00;
+  --blob-2: #8bc53d;
+  --blob-3: #b9e08a;
+  --blob-opacity: 0.5;
+
+  /* Sidebar: deep green with lime accent, the same in both modes */
+  --sidebar: #012F13;
+  --sidebar-text: #E2F0CC;
+  --sidebar-muted: #A9BC95;
+  --sidebar-hover: #0B4A22;
+  --sidebar-active: #CCFF00;
+  --sidebar-active-text: #011207;
+  --sidebar-logo: #CCFF00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #011207; --surface: #012F13; --text: #E2F0CC; --muted: #DCDCDC;
+    --border: #213C45; --primary: #CCFF00; --on-primary: #011207;
+    --accent: #8BC53D; --highlight: #213C45; --danger: #FF6B6B; --warning: #FDB022;
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.16);
+    --glass-field: rgba(1, 18, 7, 0.45);
+    --glass-field-border: rgba(255, 255, 255, 0.16);
+    --glass-shadow: 0 10px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --page-glow: linear-gradient(160deg, #011207 0%, #02210d 55%, #011207 100%);
+    --blob-1: #ccff00;
+    --blob-2: #8bc53d;
+    --blob-3: #213c45;
+    --blob-opacity: 0.28;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #011207; --surface: #012F13; --text: #E2F0CC; --muted: #DCDCDC;
+  --border: #213C45; --primary: #CCFF00; --on-primary: #011207;
+  --accent: #8BC53D; --highlight: #213C45; --danger: #FF6B6B; --warning: #FDB022;
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.16);
+    --glass-field: rgba(1, 18, 7, 0.45);
+    --glass-field-border: rgba(255, 255, 255, 0.16);
+    --glass-shadow: 0 10px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --page-glow: linear-gradient(160deg, #011207 0%, #02210d 55%, #011207 100%);
+    --blob-1: #ccff00;
+    --blob-2: #8bc53d;
+    --blob-3: #213c45;
+    --blob-opacity: 0.28;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-highlight: var(--highlight);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-glass-field: var(--glass-field);
+  --color-glass-field-border: var(--glass-field-border);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-text: var(--sidebar-active-text);
+  --color-sidebar-logo: var(--sidebar-logo);
+  --font-display: "Poppins", "Naira", system-ui, sans-serif;
+  --font-sans: "Poppins", "Naira", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+/* ---------------------------------------------------------------------------
+   Auth screens: a soft, slowly drifting colour field for the glass to sit on
+   --------------------------------------------------------------------------- */
+.auth-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--page-glow);
+}
+.auth-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: var(--blob-opacity);
+  animation: blob-drift 22s ease-in-out infinite alternate;
+}
+.auth-blob.a { width: 34rem; height: 34rem; top: -9rem; left: -8rem; background: var(--blob-1); }
+.auth-blob.b { width: 30rem; height: 30rem; bottom: -10rem; right: -7rem; background: var(--blob-2); animation-delay: -7s; }
+.auth-blob.c { width: 22rem; height: 22rem; top: 38%; left: 58%; background: var(--blob-3); animation-delay: -13s; }
+@keyframes blob-drift {
+  to { transform: translate3d(4rem, 3rem, 0) scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-blob { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Opening loader: the Phrostys logo is written across the screen from left to
+   right (a soft-edged reveal), settles, then the screen wipes upward.
+   --------------------------------------------------------------------------- */
+@property --p {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.85s cubic-bezier(0.77, 0, 0.18, 1);
+}
+.loader.is-open {
+  clip-path: inset(0 0 100% 0);
+  pointer-events: none;
+}
+.loader-logo {
+  width: min(78vw, 560px);
+  height: auto;
+  color: var(--primary);
+  --p: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) * 1% - 16%), transparent calc(var(--p) * 1%));
+  mask-image: linear-gradient(90deg, #000 calc(var(--p) * 1% - 16%), transparent calc(var(--p) * 1%));
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.loader.is-writing .loader-logo {
+  animation: loader-write 2.1s cubic-bezier(0.45, 0.05, 0.25, 1) 0.1s forwards;
+}
+@keyframes loader-write {
+  to { --p: 118; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader-logo { --p: 118; animation: none !important; }
+  .loader { clip-path: none; transition: opacity 0.3s; }
+  .loader.is-open { opacity: 0; }
+}

@@ -24,6 +24,9 @@ export interface Product {
   retail_price: number
   wholesale_price: number | null
   is_active: boolean
+  /** Website fields; only loaded where the product form needs them. */
+  description?: string | null
+  show_online?: boolean
 }
 
 export interface ProductImage {
