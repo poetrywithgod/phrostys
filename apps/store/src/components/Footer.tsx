@@ -8,7 +8,7 @@ const link = 'text-sidebar-text/90 hover:text-sidebar-active hover:underline'
 
 export default function Footer() {
   return (
-    <footer id="contact" className="mt-20 bg-sidebar text-sidebar-text">
+    <footer className="mt-20 bg-sidebar text-sidebar-text">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr_1.6fr]">
         <div className="space-y-3">
           <Logo className="h-10 w-auto text-sidebar-logo" />
@@ -21,6 +21,7 @@ export default function Footer() {
             <li><Link to="/" className={link}>Home</Link></li>
             <li><Link to="/shop" className={link}>Shop</Link></li>
             <li><Link to="/#about" className={link}>About us</Link></li>
+            <li><Link to="/contact" className={link}>Contact us</Link></li>
             <li><Link to="/cart" className={link}>Cart</Link></li>
           </ul>
         </div>

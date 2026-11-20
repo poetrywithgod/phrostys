@@ -15,6 +15,16 @@ export const shop = {
   hours: 'Mon to Sat, 8am to 6pm',
 } as const
 
+/**
+ * Photo for the Contact page. Put the image in apps/store/public/ with this file
+ * name (a shop front, the team, or the products). Until it is there, a branded
+ * panel is shown instead.
+ */
+export const contactPhoto = {
+  src: '/contact.jpg',
+  alt: 'The Phrostys shop',
+} as const
+
 export const hero = {
   title: 'Everything you need,',
   emphasis: 'delivered fresh.',

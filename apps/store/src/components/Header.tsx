@@ -35,7 +35,7 @@ export default function Header() {
           <NavLink to="/" end className={navClass}>Home</NavLink>
           <NavLink to="/shop" className={navClass}>Shop</NavLink>
           <Link to="/#about" className={linkClass}>About us</Link>
-          <Link to="/#contact" className={linkClass}>Contact us</Link>
+          <NavLink to="/contact" className={navClass}>Contact us</NavLink>
         </nav>
 
         <form onSubmit={search} role="search" className="relative ml-auto hidden max-w-sm flex-1 sm:block">
@@ -96,7 +96,7 @@ export default function Header() {
               ['/', 'Home'],
               ['/shop', 'Shop'],
               ['/#about', 'About us'],
-              ['/#contact', 'Contact us'],
+              ['/contact', 'Contact us'],
               ['/cart', 'Cart'],
               ['/order', 'Track an order'],
             ].map(([to, label]) => (
