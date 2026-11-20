@@ -205,7 +205,7 @@ body {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-.marquee-track { animation: marquee 40s linear infinite; }
+.marquee-track { animation: marquee 60s linear infinite; will-change: transform; }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none; flex-wrap: wrap; justify-content: center; width: 100%; }

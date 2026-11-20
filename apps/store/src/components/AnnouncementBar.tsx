@@ -12,19 +12,25 @@ export default function AnnouncementBar() {
   }
   lines.push(`We are open ${shop.hours}`, ...announcements)
 
-  const row = (dup: boolean) =>
-    lines.map((text, i) => (
-      <span key={`${dup ? 'b' : 'a'}${i}`} data-dup={dup ? '' : undefined} className="flex shrink-0 items-center gap-8 pr-8" aria-hidden={dup}>
-        <span>{text}</span>
-        <span className="text-accent" aria-hidden="true">◆</span>
-      </span>
-    ))
+  // Two identical halves, each long enough to be wider than any screen, so the strip
+  // loops without a gap. The track slides left by exactly one half, then repeats.
+  const COPIES = 6
+  const SECONDS_PER_LINE = 5
+  const half = (dup: boolean) =>
+    Array.from({ length: COPIES }).flatMap((_, c) =>
+      lines.map((text, i) => (
+        <span key={`${dup ? 'b' : 'a'}${c}-${i}`} data-dup={dup || c > 0 ? '' : undefined} className="flex shrink-0 items-center gap-8 pr-8" aria-hidden={dup || c > 0}>
+          <span>{text}</span>
+          <span className="text-accent" aria-hidden="true">◆</span>
+        </span>
+      )),
+    )
 
   return (
     <div className="marquee overflow-hidden bg-sidebar py-2 text-xs font-medium text-sidebar-text" role="region" aria-label="Announcements">
-      <div className="marquee-track flex w-max">
-        {row(false)}
-        {row(true)}
+      <div className="marquee-track flex w-max" style={{ animationDuration: `${lines.length * COPIES * SECONDS_PER_LINE}s` }}>
+        {half(false)}
+        {half(true)}
       </div>
     </div>
   )
