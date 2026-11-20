@@ -236,6 +236,9 @@ export default function OrderPage() {
           </ul>
           <dl className="mt-4 space-y-1 border-t border-border pt-4 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Subtotal</dt><dd>{formatNaira(order.subtotal)}</dd></div>
+            {order.fulfilment === 'pickup' && order.delivery_location && (
+              <div className="flex justify-between gap-4"><dt className="text-muted">Pickup point</dt><dd className="text-right">{order.delivery_location}</dd></div>
+            )}
             <div className="flex justify-between"><dt className="text-muted">{order.fulfilment === 'pickup' ? 'Pickup' : 'Delivery'}</dt><dd>{order.delivery_fee === 0 ? 'Free' : formatNaira(order.delivery_fee)}</dd></div>
           </dl>
         </section>

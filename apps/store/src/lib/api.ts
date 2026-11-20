@@ -109,7 +109,7 @@ export type StoreSettings = {
   outside_delivery_fee: number
   free_delivery_threshold: number | null
   pickup_enabled: boolean
-  pickup_address: string | null
+  pickup_address: string[]
   pay_on_delivery_enabled: boolean
 }
 
@@ -174,6 +174,8 @@ function friendly(code: string, detail?: string): string {
       return `${detail ?? 'An item'} is no longer available. Please remove it from your cart.`
     case 'pay_on_delivery_unavailable':
       return 'Pay on delivery isn’t available for this order. Please choose card or bank transfer.'
+    case 'invalid_pickup_point':
+      return 'Please choose one of our pickup points.'
     case 'pickup_unavailable':
       return 'Pickup isn’t available right now. Please choose delivery.'
     case 'invalid_order':
@@ -242,6 +244,7 @@ export type TrackedOrder = {
   address: string | null
   city: string | null
   state: string | null
+  delivery_location: string | null
   subtotal: number
   delivery_fee: number
   total: number

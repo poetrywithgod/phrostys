@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { MapPin, Store, Truck } from 'lucide-react'
+import { Store, Truck } from 'lucide-react'
 import OrderSummary from '../components/OrderSummary'
 import Stepper from '../components/Stepper'
 import { ErrorNote, Field, Skeleton, fieldClass, ghostBtn, primaryBtn } from '../components/ui'
@@ -26,7 +26,8 @@ export default function CheckoutPage() {
 
   if (cart.items.length === 0) return <Navigate to="/cart" replace />
 
-  const pickupOk = settings?.pickup_enabled ?? true
+  const pickupPoints = settings?.pickup_address ?? []
+  const pickupOk = settings ? settings.pickup_enabled && pickupPoints.length > 0 : true
   const fulfilment: Fulfilment = pickupOk ? form.fulfilment : 'delivery'
   const current: CheckoutForm = { ...form, fulfilment }
   const errors = validateShipping(current)
@@ -66,20 +67,26 @@ export default function CheckoutPage() {
             <legend className="mb-2 text-sm font-medium">How would you like to get your order?</legend>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className={choice(fulfilment === 'delivery')}>
-                <input type="radio" name="fulfilment" className="mt-1 accent-[var(--primary)]" checked={fulfilment === 'delivery'} onChange={() => update({ fulfilment: 'delivery' })} />
+                <input type="radio" name="fulfilment" className="mt-1 accent-[var(--primary)]" checked={fulfilment === 'delivery'} onChange={() => update({ fulfilment: 'delivery', deliveryLocation: '' })} />
                 <span><span className="flex items-center gap-2 font-semibold"><Truck size={18} /> Delivery</span><span className="text-sm text-muted">We bring it to your address</span></span>
               </label>
               {pickupOk && (
                 <label className={choice(fulfilment === 'pickup')}>
-                  <input type="radio" name="fulfilment" className="mt-1 accent-[var(--primary)]" checked={fulfilment === 'pickup'} onChange={() => update({ fulfilment: 'pickup' })} />
-                  <span><span className="flex items-center gap-2 font-semibold"><Store size={18} /> Pickup</span><span className="text-sm text-muted">Collect from our shop, free</span></span>
+                  <input type="radio" name="fulfilment" className="mt-1 accent-[var(--primary)]" checked={fulfilment === 'pickup'} onChange={() => update({ fulfilment: 'pickup', deliveryLocation: '' })} />
+                  <span><span className="flex items-center gap-2 font-semibold"><Store size={18} /> Pickup</span><span className="text-sm text-muted">Collect from a pickup point, free</span></span>
                 </label>
               )}
             </div>
-            {fulfilment === 'pickup' && settings?.pickup_address && (
-              <p className="mt-3 flex items-start gap-2 rounded-xl bg-highlight/60 px-4 py-3 text-sm"><MapPin size={16} className="mt-0.5 shrink-0" />{settings.pickup_address}</p>
-            )}
           </fieldset>
+
+          {fulfilment === 'pickup' && (
+            <Field id="deliveryLocation" label="Pickup point" required error={show('deliveryLocation')}>
+              <select {...bind('deliveryLocation')} className={fieldClass}>
+                <option value="">Choose a pickup point</option>
+                {pickupPoints.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </Field>
+          )}
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field id="firstName" label="First name" required error={show('firstName')}>

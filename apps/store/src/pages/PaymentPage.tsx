@@ -92,7 +92,7 @@ export default function PaymentPage() {
       <h1 className="mt-8 font-display text-4xl font-semibold">Payment method</h1>
 
       <p className="mt-3 rounded-xl bg-highlight/60 px-4 py-3 text-sm">
-        {pickup ? 'Pickup from our shop' : <>Delivering to <strong>{[form.address, form.city, form.state].filter(Boolean).join(', ')}</strong></>}
+        {pickup ? <>Pickup at <strong>{form.deliveryLocation}</strong></> : <>Delivering to <strong>{[form.address, form.city, form.state].filter(Boolean).join(', ')}</strong></>}
         {' '}· <Link to="/checkout" className="font-semibold underline underline-offset-4">Change</Link>
       </p>
 
