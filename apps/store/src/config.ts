@@ -40,3 +40,22 @@ export const faqs = [
   { q: 'What if something I want is sold out?', a: 'Sold-out items are marked on the shop page. Message us on WhatsApp and we’ll tell you when it’s back.' },
   { q: 'How do I reach you?', a: 'Call, email or message us on WhatsApp. Our details are at the bottom of every page.' },
 ] as const
+
+/** Extra lines for the scrolling bar at the very top. Delivery and opening hours are added automatically. */
+export const announcements: readonly string[] = ['Pay securely by card or bank transfer']
+
+/** Short notes shown on the cart page. Edit freely. */
+export const deliveryNotes: readonly string[] = [
+  'Delivery fees are shown at checkout and may vary by location',
+  'Prefer to collect? Choose pickup at checkout',
+  'Pay by card or bank transfer (Opay, Kuda, PalmPay, Moniepoint and more) through Paystack',
+  'Pay on delivery is available within Port Harcourt',
+  'Payments are processed securely by Paystack',
+]
+
+export const nigerianStates: readonly string[] = [
+  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno', 'Cross River', 'Delta',
+  'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT (Abuja)', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina',
+  'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers',
+  'Sokoto', 'Taraba', 'Yobe', 'Zamfara',
+]

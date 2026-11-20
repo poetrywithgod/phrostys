@@ -1,11 +1,16 @@
-@import "@fontsource/poppins/latin-400.css";
-@import "@fontsource/poppins/latin-500.css";
-@import "@fontsource/poppins/latin-600.css";
-@import "@fontsource/poppins/latin-700.css";
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/inter/latin-700.css";
+@import "@fontsource/cormorant-garamond/latin-500.css";
+@import "@fontsource/cormorant-garamond/latin-600.css";
+@import "@fontsource/cormorant-garamond/latin-700.css";
+@import "@fontsource/cormorant-garamond/latin-600-italic.css";
+@import "@fontsource/cormorant-garamond/latin-700-italic.css";
 @import "tailwindcss";
 
-/* Poppins everywhere (self-hosted). Poppins has no naira sign, so U+20A6 is drawn
-   from Plus Jakarta Sans, a close geometric match. */
+/* Cormorant Garamond for headings, Inter for everything else (both self-hosted).
+   Neither is loaded with the naira sign, so U+20A6 is drawn from Plus Jakarta Sans. */
 @font-face {
   font-family: "Naira"; font-weight: 400 600; font-style: normal; font-display: swap;
   src: url("@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-500-normal.woff2") format("woff2");
@@ -108,8 +113,8 @@
   --color-sidebar-active: var(--sidebar-active);
   --color-sidebar-active-text: var(--sidebar-active-text);
   --color-sidebar-logo: var(--sidebar-logo);
-  --font-display: "Poppins", "Naira", system-ui, sans-serif;
-  --font-sans: "Poppins", "Naira", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Cormorant Garamond", "Naira", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", "Naira", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 body {
@@ -190,4 +195,19 @@ body {
   .loader-logo { --p: 118; animation: none !important; }
   .loader { clip-path: none; transition: opacity 0.3s; }
   .loader.is-open { opacity: 0; }
+}
+
+/* ---------------------------------------------------------------------------
+   Announcement bar: a slow, endless scroll. Stops on hover, and is static for
+   people who ask their device to reduce motion.
+   --------------------------------------------------------------------------- */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track { animation: marquee 40s linear infinite; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; flex-wrap: wrap; justify-content: center; width: 100%; }
+  .marquee-track [data-dup] { display: none; }
 }

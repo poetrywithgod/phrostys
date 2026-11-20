@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { Menu, Moon, Search, ShoppingBag, Sun, X } from 'lucide-react'
+import { CreditCard, Menu, Moon, Search, ShoppingBag, Sun, X } from 'lucide-react'
 import { useCart } from '../lib/cart'
 import { useTheme } from '../lib/theme'
+import CategoryBar from './CategoryBar'
 import Logo from './Logo'
 
 const linkClass = 'rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-highlight'
@@ -28,14 +29,14 @@ export default function Header() {
           <Logo className="h-9 w-auto sm:h-10" />
         </Link>
 
-        <nav className="ml-4 hidden items-center gap-1 md:flex" aria-label="Main">
+        <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label="Main">
           <NavLink to="/" end className={navClass}>Home</NavLink>
           <NavLink to="/shop" className={navClass}>Shop</NavLink>
           <Link to="/#about" className={linkClass}>About us</Link>
           <Link to="/#contact" className={linkClass}>Contact us</Link>
         </nav>
 
-        <form onSubmit={search} role="search" className="relative ml-auto hidden max-w-xs flex-1 sm:block">
+        <form onSubmit={search} role="search" className="relative ml-auto hidden max-w-sm flex-1 sm:block">
           <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
             value={q}
@@ -58,18 +59,23 @@ export default function Header() {
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <Link to="/cart" className="relative grid h-10 w-10 place-items-center rounded-full transition hover:bg-highlight" aria-label={`Cart, ${count} items`}>
+          <Link to="/cart" className="relative flex flex-col items-center gap-0.5 rounded-xl px-2 py-1 transition hover:bg-highlight" aria-label={`My cart, ${count} items`}>
             <ShoppingBag size={20} />
+            <span className="hidden text-[11px] font-medium sm:block">My Cart</span>
             {count > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-full bg-accent px-1 text-[11px] font-bold leading-5 text-[#011207]">
+              <span className="absolute right-0.5 top-0 grid min-w-5 place-items-center rounded-full bg-accent px-1 text-[11px] font-bold leading-5 text-[#011207]">
                 {count}
               </span>
             )}
           </Link>
+          <Link to="/checkout" className="hidden flex-col items-center gap-0.5 rounded-xl px-2 py-1 transition hover:bg-highlight sm:flex" aria-label="Checkout">
+            <CreditCard size={20} />
+            <span className="text-[11px] font-medium">Checkout</span>
+          </Link>
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
-            className="grid h-10 w-10 place-items-center rounded-full transition hover:bg-highlight md:hidden"
+            className="grid h-10 w-10 place-items-center rounded-full transition hover:bg-highlight lg:hidden"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
@@ -80,7 +86,7 @@ export default function Header() {
       </div>
 
       {menuOpen && (
-        <nav id="mobile-menu" aria-label="Mobile" className="border-t border-border bg-bg px-4 pb-4 pt-2 md:hidden">
+        <nav id="mobile-menu" aria-label="Mobile" className="border-t border-border bg-bg px-4 pb-4 pt-2 lg:hidden">
           <ul className="flex flex-col">
             {[
               ['/', 'Home'],
@@ -88,6 +94,7 @@ export default function Header() {
               ['/#about', 'About us'],
               ['/#contact', 'Contact us'],
               ['/cart', 'Cart'],
+              ['/order', 'Track an order'],
             ].map(([to, label]) => (
               <li key={to}>
                 <Link to={to} onClick={closeMenu} className="block rounded-xl px-3 py-3 text-base font-semibold hover:bg-highlight">
@@ -98,6 +105,7 @@ export default function Header() {
           </ul>
         </nav>
       )}
+      <CategoryBar />
     </header>
   )
 }

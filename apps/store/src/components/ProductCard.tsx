@@ -35,7 +35,7 @@ export default function ProductCard({ product: p }: { product: StoreListProduct 
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         {p.category_name && <p className="text-xs font-medium uppercase tracking-wide text-muted">{p.category_name}</p>}
-        <Link to={`/product/${p.id}`} className="font-display text-base font-semibold leading-snug hover:underline">
+        <Link to={`/product/${p.id}`} className="font-display text-xl font-semibold leading-snug hover:underline">
           {p.name}
         </Link>
         {p.review_count > 0 && p.average_rating !== null && (
@@ -46,7 +46,7 @@ export default function ProductCard({ product: p }: { product: StoreListProduct 
         )}
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <div>
-            <p className="text-lg font-bold">{formatNaira(p.retail_price)}</p>
+            <p className="font-display text-2xl font-semibold">{formatNaira(p.retail_price)}</p>
             <p className="text-xs text-muted">per {p.unit}</p>
           </div>
           <button

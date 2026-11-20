@@ -100,3 +100,162 @@ export async function fetchLatestReviews(limit = 3): Promise<StoreLatestReview[]
   if (error) throw error
   return (data ?? []) as StoreLatestReview[]
 }
+
+// ------------------------------------------------------------------ settings
+
+export type StoreSettings = {
+  local_cities: string[]
+  local_delivery_fee: number
+  outside_delivery_fee: number
+  free_delivery_threshold: number | null
+  pickup_enabled: boolean
+  pickup_address: string | null
+  pay_on_delivery_enabled: boolean
+}
+
+export async function fetchSettings(): Promise<StoreSettings> {
+  const { data, error } = await supabase.rpc('store_settings_public')
+  if (error) throw error
+  const row = (data as StoreSettings[] | null)?.[0]
+  if (!row) throw new Error('Store settings are missing.')
+  return {
+    ...row,
+    local_delivery_fee: Number(row.local_delivery_fee),
+    outside_delivery_fee: Number(row.outside_delivery_fee),
+    free_delivery_threshold: row.free_delivery_threshold === null ? null : Number(row.free_delivery_threshold),
+  }
+}
+
+// -------------------------------------------------------------------- orders
+
+export type PaymentMethod = 'card' | 'bank_transfer' | 'pay_on_delivery'
+export type Fulfilment = 'delivery' | 'pickup'
+
+export type OrderInput = {
+  items: { product_id: string; qty: number }[]
+  fulfilment: Fulfilment
+  payment_method: PaymentMethod
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  address: string
+  city: string
+  state: string
+  delivery_location: string
+  note: string
+}
+
+export type PlacedOrder = {
+  order_id: string
+  order_no: string
+  email: string
+  subtotal: number
+  delivery_fee: number
+  total: number
+  payment_method: PaymentMethod
+  payment_status: string
+}
+
+/** An error with a short code (see place_order in the database) and a friendly message. */
+export class OrderError extends Error {
+  code: string
+  constructor(code: string, message: string) {
+    super(message)
+    this.code = code
+  }
+}
+
+function friendly(code: string, detail?: string): string {
+  switch (code) {
+    case 'out_of_stock':
+      return `Sorry, we don’t have enough ${detail ?? 'of that item'} in stock right now. Please lower the quantity in your cart.`
+    case 'product_unavailable':
+      return `${detail ?? 'An item'} is no longer available. Please remove it from your cart.`
+    case 'pay_on_delivery_unavailable':
+      return 'Pay on delivery isn’t available for this order. Please choose card or bank transfer.'
+    case 'pickup_unavailable':
+      return 'Pickup isn’t available right now. Please choose delivery.'
+    case 'invalid_order':
+      return 'Some of your details look incomplete or invalid. Please go back and check them.'
+    case 'empty_cart':
+      return 'Your cart is empty.'
+    case 'payments_not_configured':
+      return 'Online payment isn’t switched on yet. Please choose pay on delivery or contact us.'
+    case 'paystack_unavailable':
+      return 'We couldn’t reach the payment service. Please try again in a moment.'
+    case 'already_paid':
+      return 'This order has already been paid for.'
+    case 'order_cancelled':
+      return 'This order was cancelled.'
+    default:
+      return 'Something went wrong. Please try again.'
+  }
+}
+
+export async function placeOrder(input: OrderInput): Promise<PlacedOrder> {
+  const { data, error } = await supabase.rpc('place_order', { p_order: input })
+  if (error) {
+    const [code, ...rest] = error.message.split(':')
+    throw new OrderError(code.trim(), friendly(code.trim(), rest.join(':').trim() || undefined))
+  }
+  const o = data as PlacedOrder
+  return { ...o, subtotal: Number(o.subtotal), delivery_fee: Number(o.delivery_fee), total: Number(o.total) }
+}
+
+/** Calls one of our Edge Functions and turns its error body into an OrderError. */
+async function callFunction<T>(name: string, body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke(name, { body })
+  if (error) {
+    let code = 'unknown'
+    const res = (error as { context?: Response }).context
+    if (res && typeof res.json === 'function') {
+      const parsed = await res.json().catch(() => null)
+      if (parsed && typeof parsed.error === 'string') code = parsed.error
+    }
+    throw new OrderError(code, friendly(code))
+  }
+  return data as T
+}
+
+/** Starts a Paystack payment and returns the page to send the customer to. */
+export function startPayment(args: { order_no: string; email: string; method: 'card' | 'bank_transfer' }) {
+  return callFunction<{ authorization_url: string; reference: string }>('paystack-init', {
+    ...args,
+    callback_url: `${window.location.origin}/order/${args.order_no}`,
+  })
+}
+
+/** After returning from Paystack: asks the server to confirm the payment with Paystack. */
+export function confirmPayment(args: { order_no: string; email: string; reference: string }) {
+  return callFunction<{ payment_status: string }>('paystack-verify', args)
+}
+
+export type TrackedOrder = {
+  order_no: string
+  status: 'new' | 'preparing' | 'shipped' | 'delivered' | 'cancelled'
+  payment_status: 'unpaid' | 'paid' | 'failed'
+  payment_method: PaymentMethod
+  fulfilment: Fulfilment
+  first_name: string
+  last_name: string
+  address: string | null
+  city: string | null
+  state: string | null
+  subtotal: number
+  delivery_fee: number
+  total: number
+  created_at: string
+  paid_at: string | null
+  preparing_at: string | null
+  shipped_at: string | null
+  delivered_at: string | null
+  items: { product_id: string; name: string; unit: string; unit_price: number; quantity: number; line_total: number; image_path: string | null }[]
+}
+
+/** One order, only when the order number AND email both match. */
+export async function fetchOrder(orderNo: string, email: string): Promise<TrackedOrder | null> {
+  const { data, error } = await supabase.rpc('track_order', { p_order_no: orderNo, p_email: email })
+  if (error) throw error
+  return (data as TrackedOrder | null) ?? null
+}

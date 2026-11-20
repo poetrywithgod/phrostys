@@ -80,3 +80,31 @@ export function EmptyState({ title, children, action }: { title: string; childre
     </div>
   )
 }
+
+/** A labelled form field with an error line. Pass the id used by the input inside. */
+export function Field({
+  id,
+  label,
+  required,
+  error,
+  hint,
+  children,
+}: {
+  id: string
+  label: string
+  required?: boolean
+  error?: string
+  hint?: string
+  children: ReactNode
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="block text-sm font-medium">
+        {label} {required && <span className="text-danger" aria-hidden="true">*</span>}
+      </label>
+      {children}
+      {hint && !error && <p id={`${id}-hint`} className="text-xs text-muted">{hint}</p>}
+      {error && <p id={`${id}-error`} role="alert" className="text-xs font-semibold text-danger">{error}</p>}
+    </div>
+  )
+}
