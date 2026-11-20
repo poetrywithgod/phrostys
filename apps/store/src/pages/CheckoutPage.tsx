@@ -132,7 +132,7 @@ export default function CheckoutPage() {
           </Field>
         </div>
 
-        <aside className="h-fit rounded-2xl border border-border bg-surface p-6 shadow-sm lg:sticky lg:top-40">
+        <aside className="h-fit rounded-2xl border border-border bg-surface p-6 shadow-sm lg:sticky lg:top-28">
           <h2 className="mb-5 font-display text-2xl font-semibold">Order summary</h2>
           {loading && !settings ? <Skeleton className="h-40" /> : <OrderSummary items={cart.items} subtotal={cart.subtotal} fee={fee} pickup={!delivery} />}
         </aside>

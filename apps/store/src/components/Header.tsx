@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { CreditCard, Menu, Moon, Search, ShoppingBag, Sun, X } from 'lucide-react'
+import { Menu, Moon, Search, ShoppingBag, Sun, X } from 'lucide-react'
 import { useCart } from '../lib/cart'
 import { useTheme } from '../lib/theme'
-import CategoryBar from './CategoryBar'
 import Logo from './Logo'
 
 const linkClass = 'rounded-full px-4 py-2 text-sm font-semibold transition hover:bg-highlight'
@@ -68,10 +67,6 @@ export default function Header() {
               </span>
             )}
           </Link>
-          <Link to="/checkout" className="hidden flex-col items-center gap-0.5 rounded-xl px-2 py-1 transition hover:bg-highlight sm:flex" aria-label="Checkout">
-            <CreditCard size={20} />
-            <span className="text-[11px] font-medium">Checkout</span>
-          </Link>
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
@@ -105,7 +100,6 @@ export default function Header() {
           </ul>
         </nav>
       )}
-      <CategoryBar />
     </header>
   )
 }
