@@ -10,7 +10,8 @@ export default function AnnouncementBar() {
   if (settings && settings.free_delivery_threshold !== null && settings.local_cities.length > 0) {
     lines.push(`Free delivery on all orders above ${formatNaira(settings.free_delivery_threshold)} within ${settings.local_cities.join(', ')}`)
   }
-  lines.push(`We are open ${shop.hours}`, ...announcements)
+  if (shop.hours) lines.push(`We are open ${shop.hours}`)
+  lines.push(...announcements)
 
   // Two identical halves, each long enough to be wider than any screen, so the strip
   // loops without a gap. The track slides left by exactly one half, then repeats.

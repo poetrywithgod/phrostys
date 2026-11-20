@@ -118,6 +118,11 @@ export default function HomePage() {
           <div>
             <h2 className="font-display text-3xl font-bold">{about.title}</h2>
             <p className="mt-4 max-w-md text-base leading-relaxed text-sidebar-muted">{about.text}</p>
+            <ul className="mt-5 space-y-2 text-sm">
+              {about.supplies.map((s) => (
+                <li key={s} className="flex items-center gap-3"><span className="h-2 w-2 shrink-0 rounded-sm bg-sidebar-active" aria-hidden="true" />{s}</li>
+              ))}
+            </ul>
             <Link
               to="/shop"
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-sidebar-active px-8 py-3.5 text-base font-semibold text-[#011207] transition hover:brightness-105 active:scale-[0.98]"
@@ -133,6 +138,30 @@ export default function HomePage() {
               className="aspect-[4/3] w-full rounded-[2rem] border border-white/20 object-cover shadow-2xl"
             />
           )}
+        </div>
+      </section>
+
+      {/* Custom orders, vision and mission */}
+      <section className="mx-auto max-w-6xl px-4 py-14" aria-labelledby="custom-heading">
+        <div className="rounded-3xl bg-accent px-6 py-8 text-center text-[#011207] sm:px-10">
+          <h2 id="custom-heading" className="font-display text-3xl font-bold">{about.custom.title}</h2>
+          <p className="mt-2 text-lg font-semibold">{about.custom.text}</p>
+          <a
+            href={`https://wa.me/${shop.whatsapp}?text=${encodeURIComponent('Hello, I would like to place a custom order.')}`}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-5 inline-flex items-center rounded-full bg-[#011207] px-7 py-3 text-sm font-semibold text-white transition hover:brightness-125"
+          >
+            Tell us what you want
+          </a>
+        </div>
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          {[about.vision, about.mission].map((b) => (
+            <article key={b.title} className="rounded-3xl bg-sidebar p-7 text-sidebar-text">
+              <h3 className="font-display text-2xl font-bold text-sidebar-active">{b.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-sidebar-muted">{b.text}</p>
+            </article>
+          ))}
         </div>
       </section>
 

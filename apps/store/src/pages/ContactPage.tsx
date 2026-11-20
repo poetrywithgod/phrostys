@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Clock, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react'
+import { Clock, AtSign, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react'
 import Logo from '../components/Logo'
 import { Field, fieldClass, primaryBtn } from '../components/ui'
 import { contactPhoto, shop } from '../config'
@@ -53,7 +53,7 @@ export default function ContactPage() {
       <header className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Contact us</p>
         <h1 className="mt-2 font-display text-4xl font-semibold leading-tight sm:text-5xl">We’d love to hear from you</h1>
-        <p className="mt-3 text-muted">Questions about an order, a product or delivery? Reach us any way that suits you.</p>
+        <p className="mt-3 text-muted">Questions about an order, a custom order or bulk supply? Reach us any way that suits you.</p>
       </header>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-2 lg:gap-12">
@@ -64,9 +64,10 @@ export default function ContactPage() {
             <h2 id="reach-heading" className="font-display text-2xl font-semibold">Get in touch</h2>
             <ul className="mt-4 space-y-4 text-sm">
               <li className={row}><MapPin size={18} className={icon} /><span><span className="block font-semibold">Our shop</span>{shop.address}</span></li>
-              <li className={row}><Clock size={18} className={icon} /><span><span className="block font-semibold">Opening hours</span>{shop.hours}</span></li>
-              <li className={row}><Phone size={18} className={icon} /><span><span className="block font-semibold">Call us</span><a href={phoneHref} className="hover:underline">{shop.phone}</a></span></li>
+              {shop.hours && <li className={row}><Clock size={18} className={icon} /><span><span className="block font-semibold">Opening hours</span>{shop.hours}</span></li>}
+              <li className={row}><Phone size={18} className={icon} /><span><span className="block font-semibold">Call us</span><a href={phoneHref} className="hover:underline">{shop.phone}</a><br /><a href={`tel:${shop.phone2.replace(/\s/g, '')}`} className="hover:underline">{shop.phone2}</a></span></li>
               <li className={row}><MessageCircle size={18} className={icon} /><span><span className="block font-semibold">WhatsApp</span><a href={`https://wa.me/${shop.whatsapp}`} target="_blank" rel="noreferrer" className="hover:underline">Chat with us</a></span></li>
+              <li className={row}><AtSign size={18} className={icon} /><span><span className="block font-semibold">Instagram</span><a href={`https://instagram.com/${shop.instagram}`} target="_blank" rel="noreferrer" className="hover:underline">@{shop.instagram}</a></span></li>
               <li className={row}><Mail size={18} className={icon} /><span><span className="block font-semibold">Email</span><a href={`mailto:${shop.email}`} className="hover:underline">{shop.email}</a></span></li>
             </ul>
           </section>
