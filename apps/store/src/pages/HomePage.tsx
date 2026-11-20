@@ -106,7 +106,7 @@ export default function HomePage() {
           )}
           {best.data && best.data.length > 0 && (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {best.data.slice(0, 8).map((p) => <ProductCard key={p.id} product={p} />)}
+              {best.data.slice(0, 8).map((p) => <ProductCard key={p.id} product={p} compact />)}
             </div>
           )}
         </div>

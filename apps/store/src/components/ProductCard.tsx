@@ -6,7 +6,8 @@ import { formatNaira } from '../lib/format'
 import { imageUrl } from '../lib/supabase'
 import { Stars } from './ui'
 
-export default function ProductCard({ product: p }: { product: StoreListProduct }) {
+/** `compact` (landing page) shows a small round add button; otherwise the full-width ADD TO CART bar of the shop design. */
+export default function ProductCard({ product: p, compact = false }: { product: StoreListProduct; compact?: boolean }) {
   const cart = useCart()
   const inCart = cart.items.find((i) => i.id === p.id)?.qty ?? 0
   const canAdd = p.in_stock && inCart < p.max_order
@@ -44,23 +45,42 @@ export default function ProductCard({ product: p }: { product: StoreListProduct 
             <span>({p.review_count})</span>
           </div>
         )}
-        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-          <div>
-            <p className="font-display text-2xl font-semibold">{formatNaira(p.retail_price)}</p>
-            <p className="text-xs text-muted">per {p.unit}</p>
+        {compact ? (
+          <div className="mt-auto flex items-end justify-between gap-2 pt-2">
+            <div>
+              <p className="font-display text-2xl font-semibold">{formatNaira(p.retail_price)}</p>
+              <p className="text-xs text-muted">per {p.unit}</p>
+            </div>
+            <button
+              type="button"
+              disabled={!canAdd}
+              onClick={() =>
+                cart.add({ id: p.id, name: p.name, unit: p.unit, price: p.retail_price, image: p.cover_path, max: p.max_order })
+              }
+              className="grid h-11 w-11 place-items-center rounded-full bg-primary text-on-primary shadow-sm transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label={p.in_stock ? `Add ${p.name} to cart` : `${p.name} is sold out`}
+            >
+              <Plus size={20} />
+            </button>
           </div>
-          <button
-            type="button"
-            disabled={!canAdd}
-            onClick={() =>
-              cart.add({ id: p.id, name: p.name, unit: p.unit, price: p.retail_price, image: p.cover_path, max: p.max_order })
-            }
-            className="grid h-11 w-11 place-items-center rounded-full bg-primary text-on-primary shadow-sm transition hover:brightness-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label={p.in_stock ? `Add ${p.name} to cart` : `${p.name} is sold out`}
-          >
-            <Plus size={20} />
-          </button>
-        </div>
+        ) : (
+          <>
+            <div className="mt-auto pt-2">
+              <p className="font-display text-2xl font-semibold">{formatNaira(p.retail_price)}</p>
+              <p className="text-xs text-muted">per {p.unit}</p>
+            </div>
+            <button
+              type="button"
+              disabled={!canAdd}
+              onClick={() =>
+                cart.add({ id: p.id, name: p.name, unit: p.unit, price: p.retail_price, image: p.cover_path, max: p.max_order })
+              }
+              className="mt-2 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold uppercase tracking-wide text-on-primary shadow-sm transition hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {p.in_stock ? 'Add to cart' : 'Sold out'}
+            </button>
+          </>
+        )}
       </div>
     </article>
   )
