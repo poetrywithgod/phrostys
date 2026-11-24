@@ -5,7 +5,12 @@ import { formatNaira } from '../lib/format'
 import { imageUrl } from '../lib/supabase'
 import Logo from './Logo'
 
-export type Slide = { id: string; name: string; price: number; unit: string; image: string }
+/** A product photo from the database, or a promo image that ships with the site (e.g. the flyer). */
+export type Slide =
+  | { kind?: 'product'; id: string; name: string; price: number; unit: string; image: string }
+  | { kind: 'promo'; id: string; name: string; image: string; href: string; label: string }
+
+const slideSrc = (s: Slide) => (s.kind === 'promo' ? s.image : imageUrl(s.image))
 
 const INTERVAL_MS = 5000
 const SWIPE_PX = 40
@@ -81,21 +86,50 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
               aria-hidden={i !== current}
               className="relative aspect-[4/3] w-full shrink-0"
             >
-              <img
-                src={imageUrl(s.image)}
-                alt={s.name}
-                draggable={false}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                className="h-full w-full object-cover"
-              />
-              <Link
-                to={`/product/${s.id}`}
-                tabIndex={i === current ? 0 : -1}
-                className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-2xl bg-black/55 px-4 py-3 text-white backdrop-blur-md transition hover:bg-black/70"
-              >
-                <span className="min-w-0 truncate font-display text-sm font-semibold sm:text-base">{s.name}</span>
-                <span className="shrink-0 text-sm font-bold">{formatNaira(s.price)}</span>
-              </Link>
+              {s.kind === 'promo' ? (
+                <>
+                  {/* Portrait flyer: shown whole, over a blurred copy of itself so the 4:3 frame has no empty bars. */}
+                  <img
+                    src={s.image}
+                    alt=""
+                    aria-hidden="true"
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full scale-125 object-cover blur-2xl"
+                  />
+                  <img
+                    src={s.image}
+                    alt={s.name}
+                    draggable={false}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    className="relative h-full w-full object-contain"
+                  />
+                  <Link
+                    to={s.href}
+                    tabIndex={i === current ? 0 : -1}
+                    className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-2xl bg-black/55 px-4 py-3 text-white backdrop-blur-md transition hover:bg-black/70"
+                  >
+                    <span className="min-w-0 truncate font-display text-sm font-semibold sm:text-base">{s.label}</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <img
+                    src={slideSrc(s)}
+                    alt={s.name}
+                    draggable={false}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    className="h-full w-full object-cover"
+                  />
+                  <Link
+                    to={`/product/${s.id}`}
+                    tabIndex={i === current ? 0 : -1}
+                    className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-2xl bg-black/55 px-4 py-3 text-white backdrop-blur-md transition hover:bg-black/70"
+                  >
+                    <span className="min-w-0 truncate font-display text-sm font-semibold sm:text-base">{s.name}</span>
+                    <span className="shrink-0 text-sm font-bold">{formatNaira(s.price)}</span>
+                  </Link>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -135,7 +169,7 @@ export default function HeroCarousel({ slides }: { slides: Slide[] }) {
                   i === current ? 'border-sidebar-active' : 'border-transparent opacity-60 hover:opacity-100'
                 }`}
               >
-                <img src={imageUrl(s.image)} alt="" className="h-full w-full object-cover" />
+                <img src={slideSrc(s)} alt="" className="h-full w-full object-cover object-top" />
               </button>
             </li>
           ))}

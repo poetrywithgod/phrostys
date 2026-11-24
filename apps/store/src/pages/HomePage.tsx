@@ -24,9 +24,19 @@ export default function HomePage() {
   const reviews = useAsync(() => fetchLatestReviews(3), 'home-reviews')
 
   const withPhotos = (best.data ?? []).filter((p) => p.cover_path)
-  const slides: Slide[] = withPhotos
+  const productSlides: Slide[] = withPhotos
     .slice(0, 5)
     .map((p) => ({ id: p.id, name: p.name, price: p.retail_price, unit: p.unit, image: p.cover_path! }))
+  // The company flyer is one of the sliding images. Move it within this array to change its position.
+  const flyerSlide: Slide = {
+    kind: 'promo',
+    id: 'flyer',
+    name: 'Phrostys by Frosty’s Global Enterprises: pap, tombrown cereal, fufu flour, soya milk powder, bambara flour and more',
+    image: '/hero-flyer.webp',
+    href: '/shop',
+    label: 'Shop all products',
+  }
+  const slides: Slide[] = [flyerSlide, ...productSlides]
   // A different product photo for the two image panels below the hero.
   const featurePhoto = withPhotos[5]?.cover_path ?? withPhotos[0]?.cover_path ?? null
   const aboutPhoto = withPhotos[6]?.cover_path ?? withPhotos[1]?.cover_path ?? featurePhoto
