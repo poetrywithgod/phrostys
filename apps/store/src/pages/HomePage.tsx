@@ -6,7 +6,6 @@ import { ErrorNote, Skeleton, Stars, ghostBtn } from '../components/ui'
 import { about, faqs, features, hero, shop } from '../config'
 import { fetchBestSellers, fetchLatestReviews } from '../lib/api'
 import { formatDate } from '../lib/format'
-import { imageUrl } from '../lib/supabase'
 import { useAsync } from '../lib/useAsync'
 
 const icons: Record<(typeof features)[number]['icon'], LucideIcon> = {
@@ -37,9 +36,6 @@ export default function HomePage() {
     label: 'Shop all products',
   }
   const slides: Slide[] = [flyerSlide, ...productSlides]
-  // A different product photo for the two image panels below the hero.
-  const featurePhoto = withPhotos[5]?.cover_path ?? withPhotos[0]?.cover_path ?? null
-  const aboutPhoto = withPhotos[6]?.cover_path ?? withPhotos[1]?.cover_path ?? featurePhoto
 
   return (
     <>
@@ -68,14 +64,13 @@ export default function HomePage() {
       <section className="bg-highlight/60">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 md:grid-cols-[1fr_1.6fr]">
           <div className="hidden md:block">
-            {featurePhoto && (
-              <img
-                src={imageUrl(featurePhoto)}
-                alt=""
-                loading="lazy"
-                className="mx-auto aspect-square w-full max-w-xs rounded-[2rem] border border-border object-cover shadow-lg"
-              />
-            )}
+            {/* 4:3 image, kept in apps/store/public. Replace the file to change it. */}
+            <img
+              src="/home-products.webp"
+              alt="Phrostys fufu cassava flour, tombrown cereal and soya milk powder packs"
+              loading="lazy"
+              className="aspect-[4/3] w-full rounded-[2rem] border border-border object-cover shadow-lg"
+            />
           </div>
           <ul className="grid gap-x-8 gap-y-10 sm:grid-cols-2">
             {features.map((f) => {
@@ -140,14 +135,13 @@ export default function HomePage() {
               Shop now
             </Link>
           </div>
-          {aboutPhoto && (
-            <img
-              src={imageUrl(aboutPhoto)}
-              alt=""
-              loading="lazy"
-              className="aspect-[4/3] w-full rounded-[2rem] border border-white/20 object-cover shadow-2xl"
-            />
-          )}
+          {/* 4:3 image, kept in apps/store/public. Replace the file to change it. */}
+          <img
+            src="/home-family.webp"
+            alt="A mother serving cereal to two smiling children at the kitchen table"
+            loading="lazy"
+            className="aspect-[4/3] w-full rounded-[2rem] border border-white/20 object-cover shadow-2xl"
+          />
         </div>
       </section>
 
